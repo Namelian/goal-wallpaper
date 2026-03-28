@@ -8,6 +8,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # 이 부분을 추가하면 Node.js 24로 강제 실행되어 경고가 사라집니다.
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 프로젝트에서 쓰는 노드 버전은 그대로 두셔도 됩니다.
 
     steps:
       - name: 📥 Checkout
@@ -41,3 +49,5 @@ jobs:
           git diff --staged --quiet || \
             git commit -m "chore: wallpaper $(TZ='Asia/Seoul' date '+%Y-%m-%d')"
           git push
+
+
