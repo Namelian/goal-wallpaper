@@ -1,0 +1,44 @@
+name: Generate Wallpaper
+
+on:
+  schedule:
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 의존성 설치
+        run: npm ci
+
+      - name: 🖥️ Chromium 의존성 설치
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libatk-bridge2.0-0 libatk1.0-0 libcups2 libdrm2 \
+            libgbm1 libgtk-3-0 libnspr4 libnss3 libxcomposite1 \
+            libxdamage1 libxfixes3 libxkbcommon0 libxrandr2 \
+            xdg-utils fonts-noto-cjk
+
+      - name: 🎨 배경화면 생성
+        run: node generate.js
+
+      - name: 🚀 PNG 커밋 & 푸시
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/wallpaper.png
+          git diff --staged --quiet || \
+            git commit -m "chore: wallpaper $(TZ='Asia/Seoul' date '+%Y-%m-%d')"
+          git push
