@@ -28,8 +28,10 @@ body {
   font-family: 'DM Mono', monospace;
   position: relative;
   
-  /* [수정] 전체를 위로 올리고 하단 짤림 방지: 상단 패딩을 줄이고 하단 패딩을 크게 확보 */
-  padding: 850px 140px 650px; 
+  /* [미세 조정] 전체 레이아웃 위치 설정 */
+  /* 상단: 850px -> 870px로 살짝 내림 (20px 이동) */
+  /* 하단: 650px -> 820px로 여백을 크게 확보하여 통계를 위로 올림 */
+  padding: 870px 140px 820px; 
   display: flex;
   flex-direction: column;
 }
@@ -45,7 +47,7 @@ body::before {
   z-index: 0;
 }
 
-/* ── 콘텐츠 래퍼: 상단 정렬로 변경 ── */
+/* ── 콘텐츠 래퍼 ── */
 #inner {
   position: relative;
   z-index: 1;
@@ -53,7 +55,7 @@ body::before {
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* [수정] 중앙 정렬 -> 상단 정렬로 변경하여 달력을 위로 올림 */
+  /* 상단 정렬 유지 */
   justify-content: flex-start; 
   align-items: center;
 }
@@ -63,8 +65,8 @@ body::before {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px; /* [수정] 연도 제목과 달력 사이 여백 */
-  margin-bottom: 26px; /* [수정] 하단 구분선과의 여백 */
+  gap: 16px; /* 연도 제목과 달력 사이 여백 */
+  margin-bottom: 26px; /* 하단 구분선과의 여백 */
 }
 
 .year-label {
@@ -76,25 +78,23 @@ body::before {
   line-height: 1;
 }
 
-/* 월 그리드: 3열 4행 - [수정] 달력 찌그러짐 핵심 해결 */
+/* 월 그리드: 3열 4행 - [유지] 달력 찌그러짐 핵심 해결 */
 #months-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  
-  /* [수정] 월별 블록 사이 여백을 대폭 늘려 찌그러짐 해결 (상하, 좌우) */
+  /* 월별 블록 사이 여백을 대폭 늘려 찌그러짐 해결 */
   gap: 20px 18px; 
-  
   width: 100%;
 }
 
 .month-block {
   display: flex;
   flex-direction: column;
-  gap: 6px; /* [수정] 월 이름과 날짜 그리드 사이 여백 */
+  gap: 6px; /* 월 이름과 날짜 그리드 사이 여백 */
 }
 
 .month-name {
-  font-size: 12px; /* [수정] 가독성을 위해 살짝 키움 */
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.10em;
   text-transform: uppercase;
@@ -104,21 +104,18 @@ body::before {
 
 .month-name.current-month { color: var(--accent); }
 
-/* 7×6 날짜 그리드 - [수정] 원의 크기와 간격 비율 유지 */
+/* 7×6 날짜 그리드 */
 .day-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px 3px; /* [수정] 상하 4px, 좌우 3px 여백 유지 */
+  gap: 4px 3px; /* 원 사이 간격 유지 */
 }
 
 .dot {
-  /* [수정] 원의 크기를 키워 시원하게 보이게 함 */
+  /* 원의 크기 유지 */
   width: 38px;
   height: 38px;
-  
-  /* [수정] 넓어진 칸 안에서 원을 정중앙 배치 */
-  margin: 0 auto; 
-  
+  margin: 0 auto; /* 칸 안에서 중앙 배치 */
   border-radius: 50%;
 }
 
@@ -145,7 +142,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-bottom: 20px; /* [수정] 하단 통계와의 여백 */
+  margin-bottom: 20px; /* 하단 통계와의 여백 */
 }
 
 .year-bar-row {
@@ -187,16 +184,16 @@ body::before {
   border-radius: 3px;
 }
 
-/* ── 하단 통계: 시원하게 정렬 ── */
+/* ── 하단 통계 ── */
 #bottom-stats {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  
-  /* [추가] 통계가 독 아이콘 위로 시원하게 올라오게 함 */
   margin-top: auto; 
-  padding-bottom: 120px; /* [수정] 독 아이콘과의 여백 확보 */
+  
+  /* [미세 조정] 통계가 독 아이콘 위로 시원하게 올라오게 함 */
+  padding-bottom: 150px; /* 기존 120px -> 150px로 올려 더 많이 여백 확보 */
 }
 
 .stat-days {
