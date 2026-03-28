@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg:           #0a0a0f;
+    --accent:       #ff6b2b;
+    --accent-glow:  rgba(255,107,43,0.25);
+    --white:        #f0ede8;
+    --dim:          #2a2a38;
+    --muted:        #1a1a26;
+    --text-secondary: #555570;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── 캔버스: 정확히 1179×2556 ── */
+  body {
+    width: 1179px;
+    height: 2556px;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'DM Mono', monospace;
+    position: relative;
+  }
+
+  /* 배경 그레인 */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 700px 500px at 50% 40%, rgba(255,107,43,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── 콘텐츠 래퍼 ── */
+  #inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* 상단: 시계/상태바 / 하단: 홈바+독 */
+    padding: 300px 130px 400px;
+  }
+
+  /* ── 달력 섹션 ── */
+  #calendar-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .year-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* 월 그리드: 3열 4행 */
+  #months-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  .month-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .month-name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    line-height: 1;
+  }
+
+  .month-name.current-month { color: var(--accent); }
+
+  /* 7×6 날짜 그리드 */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1.5px 1px;
+  }
+
+  .dot {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .dot.past   { background: var(--white); opacity: 0.85; }
+  .dot.today  { background: var(--accent); }
+  .dot.future { background: var(--dim); }
+  .dot.empty  { background: transparent; }
+
+  /* ── 구분선 ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(255,255,255,0.08) 20%,
+      rgba(255,255,255,0.08) 80%,
+      transparent);
+    margin-bottom: 18px;
+  }
+
+  /* ── 연도 진행 바 ── */
+  #year-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 22px;
+  }
+
+  .year-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .year-num {
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    width: 52px;
+    flex-shrink: 0;
+    text-align: right;
+    line-height: 1;
+  }
+
+  .year-num.past-year    { color: rgba(240,237,232,0.55); }
+  .year-num.current-year { color: var(--accent); font-weight: 500; }
+  .year-num.future-year  { color: var(--text-secondary); }
+
+  .year-bar-track {
+    flex: 1;
+    height: 4px;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .year-bar-track.past-year    { background: rgba(240,237,232,0.6); }
+  .year-bar-track.current-year { background: var(--dim); }
+  .year-bar-track.future-year  { background: var(--muted); }
+
+  .year-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  /* ── 하단 통계 ── */
+  #bottom-stats {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .stat-days {
+    font-family: 'Syne', sans-serif;
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .stat-days span {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    font-family: 'DM Mono', monospace;
+    margin-left: 4px;
+  }
+
+  .stat-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-align: right;
+  }
+
+  .stat-pct span {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-family: 'DM Mono', monospace;
+    display: block;
+    letter-spacing: 0.1em;
+    text-align: right;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+<div id="inner">
+
+  <div id="calendar-section">
+    <div class="year-label" id="year-title"></div>
+    <div id="months-grid"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div id="year-bars"></div>
+
+  <div id="bottom-stats">
+    <div class="stat-days" id="days-left-el">—<span>d left</span></div>
+    <div class="stat-pct"  id="pct-el">—%<span>complete</span></div>
+  </div>
+
+</div>
+
+<script>
+// ── KST 날짜 유틸 ──────────────────────────────────────────
+function kstNow() {
+  const now = new Date();
+  return new Date(now.getTime() + 9 * 60 * 60 * 1000);
+}
+
+function kstDate(d) {
+  const t = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return { y: t.getUTCFullYear(), m: t.getUTCMonth(), d: t.getUTCDate() };
+}
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+
+// ── 상수 ───────────────────────────────────────────────────
+const START      = Date.UTC(2021, 11, 5);   // 2021-12-05
+const END        = Date.UTC(2031, 11, 5);   // 2031-12-05
+const START_YEAR = 2021;
+const END_YEAR   = 2031;
+const MONTHS     = ['JAN','FEB','MAR','APR','MAY','JUN',
+                    'JUL','AUG','SEP','OCT','NOV','DEC'];
+
+// ── 달력 ───────────────────────────────────────────────────
+function buildCalendar({ y: ty, m: tm, d: td }) {
+  document.getElementById('year-title').textContent = ty;
+  const grid = document.getElementById('months-grid');
+  grid.innerHTML = '';
+
+  const kstToday = Date.UTC(ty, tm, td);
+
+  for (let mo = 0; mo < 12; mo++) {
+    const block = document.createElement('div');
+    block.className = 'month-block';
+
+    const label = document.createElement('div');
+    label.className = 'month-name' + (mo === tm ? ' current-month' : '');
+    label.textContent = MONTHS[mo];
+    block.appendChild(label);
+
+    const dayGrid = document.createElement('div');
+    dayGrid.className = 'day-grid';
+
+    const firstDay    = new Date(Date.UTC(ty, mo, 1)).getUTCDay();
+    const daysInMonth = new Date(Date.UTC(ty, mo + 1, 0)).getUTCDate();
+
+    for (let cell = 0; cell < 42; cell++) {
+      const dot    = document.createElement('div');
+      dot.className = 'dot';
+      const dayNum = cell - firstDay + 1;
+
+      if (dayNum < 1 || dayNum > daysInMonth) {
+        dot.classList.add('empty');
+      } else {
+        const dateMs  = Date.UTC(ty, mo, dayNum);
+        const inRange = dateMs >= START && dateMs <= END;
+
+        if (!inRange) {
+          dot.classList.add('empty');
+        } else if (mo === tm && dayNum === td) {
+          dot.classList.add('today');
+        } else if (dateMs < kstToday) {
+          dot.classList.add('past');
+        } else {
+          dot.classList.add('future');
+        }
+      }
+      dayGrid.appendChild(dot);
+    }
+
+    block.appendChild(dayGrid);
+    grid.appendChild(block);
+  }
+}
+
+// ── 연도 바 ────────────────────────────────────────────────
+function buildYearBars({ y: ty, m: tm, d: td }) {
+  const el = document.getElementById('year-bars');
+  el.innerHTML = '';
+  const kstToday = Date.UTC(ty, tm, td);
+
+  for (let y = START_YEAR; y <= END_YEAR; y++) {
+    const row   = document.createElement('div');
+    row.className = 'year-bar-row';
+
+    const num   = document.createElement('div');
+    const track = document.createElement('div');
+    num.textContent = y;
+
+    if (y < ty) {
+      num.className   = 'year-num past-year';
+      track.className = 'year-bar-track past-year';
+    } else if (y === ty) {
+      num.className   = 'year-num current-year';
+      track.className = 'year-bar-track current-year';
+      const pct = (kstToday - Date.UTC(y, 0, 1)) /
+                  (Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1));
+      const fill = document.createElement('div');
+      fill.className = 'year-bar-fill';
+      fill.style.width = (Math.min(1, pct) * 100).toFixed(2) + '%';
+      track.appendChild(fill);
+    } else {
+      num.className   = 'year-num future-year';
+      track.className = 'year-bar-track future-year';
+    }
+
+    row.appendChild(num);
+    row.appendChild(track);
+    el.appendChild(row);
+  }
+}
+
+// ── 하단 통계 ──────────────────────────────────────────────
+function buildStats({ y: ty, m: tm, d: td }) {
+  const kstToday  = Date.UTC(ty, tm, td);
+  const total     = daysBetween(START, END);
+  const elapsed   = Math.max(0, daysBetween(START, kstToday));
+  const remaining = Math.max(0, daysBetween(kstToday, END));
+  const pct       = Math.min(100, Math.floor(elapsed / total * 100));
+
+  document.getElementById('days-left-el').innerHTML =
+    `${remaining.toLocaleString()}<span>d left</span>`;
+  document.getElementById('pct-el').innerHTML =
+    `${pct}%<span>complete</span>`;
+}
+
+// ── 실행 ───────────────────────────────────────────────────
+const today = kstDate(kstNow());
+buildCalendar(today);
+buildYearBars(today);
+buildStats(today);
+</script>
+</body>
+</html>

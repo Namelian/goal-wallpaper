@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "outputDirectory": "public",
+  "builds": [
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/wallpaper.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ]
+}
