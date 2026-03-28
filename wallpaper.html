@@ -30,8 +30,8 @@ body {
   
   /* [미세 조정] 전체 레이아웃 설정 */
   /* 상단: 870px로 살짝 내림 (유지) */
-  /* 하단: 820px -> 1000px로 여백을 크게 확보하여 통계를 위로 올림 */
-  padding: 870px 200px 1000px; 
+/* 첫 번째 숫자가 상단 여백입니다. 870에서 840으로 줄여보세요. */
+  padding: 840px 200px 1000px; 
   display: flex;
   flex-direction: column;
 }
@@ -96,9 +96,10 @@ body::before {
 }
 
 .month-name {
-  font-size: 11px; /* 가독성을 위해 살짝 키움 (유지) */
-  font-weight: 500;
-  letter-spacing: 0.10em;
+  font-size: 18px;      /* 11px에서 18px로 키웁니다. */
+  font-weight: 700;     /* 500에서 700으로 바꿔 더 두껍게 만듭니다. */
+  letter-spacing: 0.05em; /* 자간을 살짝 좁혀서 가독성을 높입니다. */
+  margin-bottom: 4px;   /* 글자와 원 사이 간격이 너무 좁으면 추가하세요. */
   text-transform: uppercase;
   color: var(--text-secondary);
   line-height: 1;
