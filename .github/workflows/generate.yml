@@ -20,7 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 의존성 설치
-        run: npm ci
+        run: npm install
 
       - name: 🖥️ Chromium 의존성 설치
         run: |
