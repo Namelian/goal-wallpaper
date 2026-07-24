@@ -8,18 +8,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Node.js 24 강제 실행 설정을 여기에 한 번만 적습니다.
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
+    # 실패시 최대 3번 재시도
+    strategy:
+      max-parallel: 1
+      matrix:
+        attempt: [1]
+    timeout-minutes: 20
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: 🟢 Node.js 설정
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: 📦 의존성 설치
         run: npm install
@@ -45,4 +52,13 @@ jobs:
             git commit -m "chore: wallpaper $(TZ='Asia/Seoul' date '+%Y-%m-%d')"
           git push
 
+  # 메인 job 실패시 재시도
+  retry:
+    runs-on: ubuntu-latest
+    needs: build
+    if: failure()
+    timeout-minutes: 20
 
+    steps:
+      - name: ⏳ 1분 대기 후 재시도
+        run: sleep 60
